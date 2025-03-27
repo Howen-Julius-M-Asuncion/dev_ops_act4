@@ -430,7 +430,6 @@ class _SettingsPageState extends State<SettingsPage> {
                           print("Light Mode Changed: ");
                           print(OptionSettings.isLightMode);
 
-                          (context.findAncestorStateOfType<_HomepageState>())?.updateTheme();
 
                         }),
                       ),

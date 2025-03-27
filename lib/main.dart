@@ -1,20 +1,20 @@
 import 'dart:convert';
-
+import 'package:dev_ops_act4/config/options.dart';
+import 'package:dev_ops_act4/pages/settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
-void main() {
-  runApp(
-    CupertinoApp(
-        title: 'NavBook',
-        home: Homepage(),
-        debugShowCheckedModeBanner: false,
-        theme: CupertinoThemeData(
-            brightness: Brightness.dark
-        )
-    ),
-  );
-}
+bool isLightMode = OptionSettings.isLightMode;
+
+void main()=>runApp(CupertinoApp(
+
+  home: Homepage(),
+  title: 'NavBook',
+  debugShowCheckedModeBanner: false,
+  theme: CupertinoThemeData(
+    brightness: isLightMode ? Brightness.light : Brightness.dark,
+  ),
+));
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -26,10 +26,6 @@ class Homepage extends StatefulWidget {
 class _HomepageState extends State<Homepage> {
   @override
 
-  bool isCityOnly = false;
-
-  String city = "Mexico";
-  String country = "Philippines";
   String location = "";
 
   String temp = "";
@@ -53,40 +49,41 @@ class _HomepageState extends State<Homepage> {
     try{
       // Since WeatherOpen API only takes alpha-2 country code
       // User rest countries API to return coutnry alpha-2
-      if(!isCityOnly){
-        String restLink = "https://restcountries.com/v3.1/name/"+country+"?fields=name,cca2";
+      if(!OptionSettings.isCityOnly){
+        String restLink = "https://restcountries.com/v3.1/name/${OptionSettings.country}?fields=name,cca2";
         final restResponse = await http.get(Uri.parse(restLink));
 
         countryData = jsonDecode(restResponse.body);
+        print(restResponse.body);
       }
+
 
       // print(countryData[0]['name']['common']);
 
-      String baseUnit = unitOptions[3] ?? "standard";
-      String link = isCityOnly
-          ? "https://api.openweathermap.org/data/2.5/weather?q="+city+",&units="+baseUnit+"&appid=ad66cda9e6fae9cf07de09f1301c1f37"
-          : "https://api.openweathermap.org/data/2.5/weather?q="+city+","+countryData[0]["cca2"]+"&units="+baseUnit+"&appid=ad66cda9e6fae9cf07de09f1301c1f37";
-      final weatherResponse = await http.get(Uri.parse(link)    );
+      String link = OptionSettings.isCityOnly
+          ? "https://api.openweathermap.org/data/2.5/weather?q=${OptionSettings.city},&units=${unitOptions[OptionSettings.unit]}&appid=ad66cda9e6fae9cf07de09f1301c1f37"
+          : "https://api.openweathermap.org/data/2.5/weather?q=${OptionSettings.city},${countryData[0]["cca2"]}&units=${unitOptions[OptionSettings.unit]}&appid=ad66cda9e6fae9cf07de09f1301c1f37";
+      final weatherResponse = await http.get(Uri.parse(link));
 
       weatherData = jsonDecode(weatherResponse.body);
 
       try{
         setState(() {
 
-          location = isCityOnly
-              ? weatherData['name']
-              : weatherData['name']+", "+countryData[0]['name']['common'];
+          location = OptionSettings.isCityOnly
+              ? "${weatherData["name"]}"
+              : "${weatherData["name"]}, ${countryData[0]["name"]["common"]}";
 
-          if(baseUnit == "standard"){
+          if(unitOptions[OptionSettings.unit] == "standard"){
             temp = (weatherData["main"]["temp"]).toStringAsFixed(0) + "K";
-          }else if(baseUnit == "imperial"){
+          }else if(unitOptions[OptionSettings.unit] == "imperial"){
             temp = (weatherData["main"]["temp"]).toStringAsFixed(0) + "°F";
           }else{
             temp = (weatherData["main"]["temp"]).toStringAsFixed(0) + "°C";
           }
 
-          humidity = (weatherData["main"]["humidity"]).toString() + "%";
-          windSpeed = (weatherData["main"]["humidity"]).toString() + " kph";
+          humidity = "${weatherData["main"]["humidity"]}%";
+          windSpeed = "${weatherData["main"]["humidity"]} kph";
           weather = weatherData["weather"][0]["description"];
 
           if(weather.contains("clear")){
@@ -137,9 +134,13 @@ class _HomepageState extends State<Homepage> {
         print(weatherData["weather"][0]["description"]);
       }else{
         print("Invalid City!");
+        print(link);
+        print(OptionSettings.city);
+        print(OptionSettings.country);
       }
 
       // print(unitOptions[1]);
+      // print(restResponse.body);
       print(weatherResponse.body);
 
       // String location = weatherData['name']+", "+countryData[0]['name']['common'];
@@ -162,12 +163,38 @@ class _HomepageState extends State<Homepage> {
       });
     }
   }
+
+
+  Color _color = CupertinoColors.systemPurple;
+
   @override
   void initState() {
     getWeatherData();
     super.initState();
   }
   Widget build(BuildContext context) {
+
+
+    print("Light Mode from Main: ");
+    print(OptionSettings.isLightMode);
+
+
+    if (OptionSettings.accent == "purple"){
+      setState(() {
+        _color = CupertinoColors.systemPurple;
+      });
+    }else if (OptionSettings.accent == "pink"){
+      _color = CupertinoColors.systemPink;
+    }else if (OptionSettings.accent == "yellow"){
+      _color = CupertinoColors.systemYellow;
+    }else if (OptionSettings.accent == "orange"){
+      _color = CupertinoColors.systemOrange;
+    }else if (OptionSettings.accent == "blue"){
+      _color = CupertinoColors.systemBlue;
+    }else if (OptionSettings.accent == "opposite"){
+      _color = CupertinoColors.label.resolveFrom(context);
+    }
+
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: Text(
@@ -176,8 +203,17 @@ class _HomepageState extends State<Homepage> {
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           child: Icon(
-              CupertinoIcons.settings, color: CupertinoColors.systemPurple),
-          onPressed: () {},
+              CupertinoIcons.settings, color: _color),
+          onPressed: () {
+            Navigator.push(
+              context,
+              CupertinoPageRoute(builder: (context) => SettingsPage()),
+            ).then((value) {
+              setState(() {
+                getWeatherData();
+              });
+            });
+          },
         ),
         backgroundColor: CupertinoColors.black,
       ),
@@ -192,21 +228,21 @@ class _HomepageState extends State<Homepage> {
               SizedBox(height: 20),
               Row(mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(CupertinoIcons.thermometer, color: CupertinoColors.systemPurple, size: 70,),
+                  Icon(CupertinoIcons.thermometer, color: _color, size: 70,),
                   Text('$temp', style: TextStyle(fontSize: 80),),
                 ],
               ),
               SizedBox(height: 10),
-              Icon(weatherStatus, color: CupertinoColors.systemPurple, size: 100,),
+              Icon(weatherStatus, color: _color, size: 100,),
               SizedBox(height: 10),
               Text('$weather'),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(CupertinoIcons.drop, color: CupertinoColors.systemPurple, size: 18,),
+                  Icon(CupertinoIcons.drop, color: _color, size: 18,),
                   Text('H: $humidity'),
                   SizedBox(width: 15,),
-                  Icon(CupertinoIcons.wind, color: CupertinoColors.systemPurple, size: 18,),
+                  Icon(CupertinoIcons.wind, color: _color, size: 18,),
                   Text('W: $windSpeed')
                 ],
               ),
@@ -215,6 +251,10 @@ class _HomepageState extends State<Homepage> {
         ) : Center(child: CupertinoActivityIndicator(),),
       ),
     );
+  }
+
+  void updateTheme() {
+    final appState = context.findAncestorStateOfType<_HomepageState>();
   }
 }
 
