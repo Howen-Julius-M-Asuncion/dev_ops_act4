@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
-import 'package:dev_ops_act4/main.dart';
-import 'package:dev_ops_act4/config/options.dart';
+import 'package:com.hgr.weatherapp/main.dart';
+import 'package:com.hgr.weatherapp/config/options.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
