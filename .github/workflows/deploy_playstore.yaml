@@ -67,6 +67,6 @@ jobs:
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: ${{ env.SERVICE_ACCOUNT_PATH }}
-          packageName: com.bscs3a.navbook
+          packageName: com.hgr.weatherapp
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
           track: internal
