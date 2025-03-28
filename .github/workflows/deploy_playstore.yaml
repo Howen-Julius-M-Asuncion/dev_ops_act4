@@ -69,4 +69,5 @@ jobs:
           serviceAccountJson: ${{ env.SERVICE_ACCOUNT_PATH }}
           packageName: com.bscs3a.navbook
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          version: 1.0.1+2
           track: internal
