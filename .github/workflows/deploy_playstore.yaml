@@ -1,8 +1,6 @@
 on:
-  # Run this workflow when any new code is pushed into the main branch
   push:
-    tags:
-      - "v1.0.*"
+    branches: [ "master" ]
 
 jobs:
   store_deploy_android:
