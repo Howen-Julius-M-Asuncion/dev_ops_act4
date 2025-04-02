@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:com.hgr.weatherapp/config/options.dart';
-import 'package:com.hgr.weatherapp/pages/settings.dart';
+import 'package:weatherapp/config/options.dart';
+import 'package:weatherapp/pages/settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
