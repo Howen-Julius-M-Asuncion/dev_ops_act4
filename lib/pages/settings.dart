@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
-import 'package:com.hgr.weatherapp/main.dart';
-import 'package:com.hgr.weatherapp/config/options.dart';
+import 'package:weatherapp/main.dart';
+import 'package:weatherapp/config/options.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -56,7 +56,14 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        automaticallyImplyLeading: true,
+        // automaticallyImplyLeading: true,
+        leading: CupertinoButton(child: Icon(CupertinoIcons.chevron_back, color: CupertinoColors.systemBlue),
+            onPressed: (){
+              Navigator.pushReplacement(
+                context,
+                CupertinoPageRoute(builder: (context) => Homepage()),
+              );
+            }),
         middle: Text('Settings'),
       ),
       child: SafeArea(

@@ -1,4 +1,4 @@
-package com.example.dev_ops_act4
+package com.hgr.weatherapp
 
 import io.flutter.embedding.android.FlutterActivity
 
